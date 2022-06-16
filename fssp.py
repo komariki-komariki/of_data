@@ -1,3 +1,4 @@
+from passwords import token_ofdata
 import requests
 from main import data_requisites
 from data import json_file, json_speckabel, res_fssp, json_vtb, res_fssp_vtb
@@ -8,8 +9,7 @@ a = data_requisites(json_vtb)
 # ogrn = (a['ogrn'])
 # ogrn = '1157232015830'
 def zapros():
-    token = 'mEaI79kfft6fWuJ2'
-    url = f'https://api.ofdata.ru/v2/enforcements?key={token}&ogrn={ogrn}&sort=-date'
+    url = f'https://api.ofdata.ru/v2/enforcements?key={token_ofdata}&ogrn={ogrn}&sort=-date'
     response = requests.get(url).json()
     print(response['meta'])
     return response
