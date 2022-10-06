@@ -52,10 +52,10 @@ def managers (json_f):
             ogrn = org['ОГРН']
             okved = org['ОКВЭД']
             adress = org['ЮрАдрес']
-            date_likv = org['ДатаЛикв']
+            # date_likv = org['ДатаЛикв']
             manager_liquidated.append(
                 f'{name} \n {okved} \n ИНН: {inn} ОГРН: {ogrn} \n '
-                f'Дата ликвидации - {date_likv}')
+                f'Дата ликвидации - ')
     my_dict = {'manager_current':"\n".join(manager_current),
                'manager_liquidated': "\n".join(manager_liquidated)}
     return my_dict
@@ -109,3 +109,4 @@ def fl():
     union_data = union_dict(founder, manager, busines)
     word_founders(union_data)
 
+fl()

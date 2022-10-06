@@ -2,6 +2,7 @@ from passwords import token_ofdata
 import requests
 from docxtpl import DocxTemplate
 from datetime import datetime
+from postmail import sendmail
 
 
 def zapros(inn):
@@ -56,14 +57,17 @@ def data_requisites(json_f):
     preds = []  # Список представительств
     nalogs_list = []  # список налогов
     for founder_ul in json_f['data']['Учред']['РосОрг']:  # Учредитель ЮЛ
-        name_founder = founder_ul['НаимПолн']
-        ogrn_founder = founder_ul['ОГРН']
-        inn_founder = founder_ul['ИНН']
-        fraction_money = founder_ul['Доля']['Номинал']
-        fraction_percent = founder_ul['Доля']['Процент']
-        founders_list_employer.append(f'- {name_founder}, ИНН {inn_founder} - '
-                                    f'{fraction_percent}% в УК ({fraction_money}'
-                                    f' рублей)\n')
+        try:
+            name_founder = founder_ul['НаимПолн']
+            ogrn_founder = founder_ul['ОГРН']
+            inn_founder = founder_ul['ИНН']
+            fraction_money = founder_ul['Доля']['Номинал']
+            fraction_percent = founder_ul['Доля']['Процент']
+            founders_list_employer.append(f'- {name_founder}, ИНН {inn_founder} - '
+                                        f'{fraction_percent}% в УК ({fraction_money}'
+                                        f' рублей)\n')
+        except:
+            founders_list_employer.append('Что-то пошло не так')
     for founder in json_f['data']['Учред']['ФЛ']:  # Учредитель ФЛ
         fio_founder = founder['ФИО']
         inn_founder = founder['ИНН']
@@ -100,8 +104,8 @@ def data_requisites(json_f):
             numb = lic['Номер']
             permission.append(
                 f'- Лицензия № {numb} от {date.date().strftime("%d.%m.%Y")}'
-                f' г.; \n Выдавший орган: {org.lower()}; '
-                f'\n Разрешенные виды деятельности деятельности: {"; ".join(deyat)} ')
+                f' г.;\nВыдавший орган: {org.lower()}; '
+                f'\nРазрешенные виды деятельности деятельности: {"; ".join(deyat)} ')
     if 'Филиал' in json_f['data']['Подразд']:  # Филиалы
         for filial in json_f['data']['Подразд']['Филиал']:
             fil_adress = filial['Адрес']
@@ -128,7 +132,7 @@ def data_requisites(json_f):
         for nalog in json_f['data']['Налоги']['СведУпл']:
             nalog_name = nalog['Наим']
             nalog_sum = nalog['Сумма']
-            nalogs_list.append(f'{nalog_name} - {nalog_sum} рублей;')
+            nalogs_list.append(f'{nalog_name} - {nalog_sum} рублей;\n')
     else:
         nalogs_list.append('сведения отсутствуют')
     employer_dict = {'full_name': full_name,
@@ -159,12 +163,14 @@ def word_employer(my_dict):
     doc.render(context)
     short_name = my_dict["short_name"].replace('"', '')
     date = datetime.now().date().strftime('%d.%m.%Y')
-    doc.save(f"{short_name}_{date}.docx")
+    file_name = f"{short_name}_{date}.docx"
+    doc.save(file_name)
+    return file_name
 
 
 def employer():
     inn_org = str(input("Введите ИНН: "))
-    word_employer(data_requisites(zapros(inn_org)))
+    sendmail(word_employer(data_requisites(zapros(inn_org))))
 
 
 employer()
